@@ -112,10 +112,10 @@ AP_VideoTX::PowerLevel AP_VideoTX::_power_levels[VTX_MAX_POWER_LEVELS] = {
     { 0x11, 100,  20, 0xFF }, // only in SA 2.1
     { 1,    200,  23, 16   },
     { 0x12, 400,  26, 0xFF }, // only in SA 2.1
-    { 2,    500,  27, 25   },
-    //{ 0x13, 600,  28, 0xFF },
-    { 3,    800,  29, 40   },
-    { 0x13, 1000, 30, 0xFF }, // only in SA 2.1
+    //{ 2,    500,  27, 25   },
+    { 0x13, 600,  28, 0xFF },
+    //{ 3,    800,  29, 40   },
+    //{ 0x13, 1000, 30, 0xFF }, // only in SA 2.1
     { 0xFF, 0,    0,  0XFF, PowerActive::Inactive }  // slot reserved for a custom power level
 };
 

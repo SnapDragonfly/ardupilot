@@ -21,7 +21,7 @@
 #include <AP_Param/AP_Param.h>
 
 #define VTX_MAX_CHANNELS 8
-#define VTX_MAX_POWER_LEVELS 9
+#define VTX_MAX_POWER_LEVELS 7
 
 class AP_VideoTX {
 public:
@@ -83,7 +83,6 @@ public:
     };
 
     static PowerLevel _power_levels[VTX_MAX_POWER_LEVELS];
-
     static const uint16_t VIDEO_CHANNELS[MAX_BANDS][VTX_MAX_CHANNELS];
 
     static uint16_t get_frequency_mhz(uint8_t band, uint8_t channel) { return VIDEO_CHANNELS[band][channel]; }
