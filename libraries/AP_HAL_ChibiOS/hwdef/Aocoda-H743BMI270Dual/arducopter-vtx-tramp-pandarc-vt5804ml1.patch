@@ -1,0 +1,40 @@
+diff --git a/libraries/AP_VideoTX/AP_VideoTX.cpp b/libraries/AP_VideoTX/AP_VideoTX.cpp
+index 72fe6e4e54..8568116380 100644
+--- a/libraries/AP_VideoTX/AP_VideoTX.cpp
++++ b/libraries/AP_VideoTX/AP_VideoTX.cpp
+@@ -109,10 +109,10 @@ AP_VideoTX::PowerLevel AP_VideoTX::_power_levels[VTX_MAX_POWER_LEVELS] = {
+     { 0x11, 100,  20, 0xFF }, // only in SA 2.1
+     { 1,    200,  23, 16   },
+     { 0x12, 400,  26, 0xFF }, // only in SA 2.1
+-    { 2,    500,  27, 25   },
+-    //{ 0x13, 600,  28, 0xFF },
+-    { 3,    800,  29, 40   },
+-    { 0x13, 1000, 30, 0xFF }, // only in SA 2.1
++    //{ 2,    500,  27, 25   },
++    { 0x13, 600,  28, 0xFF },
++    //{ 3,    800,  29, 40   },
++    //{ 0x13, 1000, 30, 0xFF }, // only in SA 2.1
+     { 0xFF, 0,    0,  0XFF, PowerActive::Inactive }  // slot reserved for a custom power level
+ };
+ 
+diff --git a/libraries/AP_VideoTX/AP_VideoTX.h b/libraries/AP_VideoTX/AP_VideoTX.h
+index 4ffa6c21ab..1d8698c487 100644
+--- a/libraries/AP_VideoTX/AP_VideoTX.h
++++ b/libraries/AP_VideoTX/AP_VideoTX.h
+@@ -21,7 +21,7 @@
+ #include <AP_Param/AP_Param.h>
+ 
+ #define VTX_MAX_CHANNELS 8
+-#define VTX_MAX_POWER_LEVELS 9
++#define VTX_MAX_POWER_LEVELS 7
+ 
+ class AP_VideoTX {
+ public:
+@@ -80,7 +80,6 @@ public:
+     };
+ 
+     static PowerLevel _power_levels[VTX_MAX_POWER_LEVELS];
+-
+     static const uint16_t VIDEO_CHANNELS[MAX_BANDS][VTX_MAX_CHANNELS];
+ 
+     static uint16_t get_frequency_mhz(uint8_t band, uint8_t channel) { return VIDEO_CHANNELS[band][channel]; }
