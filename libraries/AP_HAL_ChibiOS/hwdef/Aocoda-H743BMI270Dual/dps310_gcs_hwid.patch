@@ -1,0 +1,49 @@
+diff --git a/libraries/AP_Baro/AP_Baro_DPS280.cpp b/libraries/AP_Baro/AP_Baro_DPS280.cpp
+index 5103fb20bc..8eef71f3a7 100644
+--- a/libraries/AP_Baro/AP_Baro_DPS280.cpp
++++ b/libraries/AP_Baro/AP_Baro_DPS280.cpp
+@@ -60,7 +60,7 @@ AP_Baro_Backend *AP_Baro_DPS280::probe(AP_Baro &baro,
+     if (sensor) {
+         sensor->is_dps310 = _is_dps310;
+     }
+-    if (!sensor || !sensor->init()) {
++    if (!sensor || !sensor->init(_is_dps310)) {
+         delete sensor;
+         return nullptr;
+     }
+@@ -153,7 +153,7 @@ void AP_Baro_DPS280::set_config_registers(void)
+     }
+ }
+ 
+-bool AP_Baro_DPS280::init()
++bool AP_Baro_DPS280::init(bool _is_dps310)
+ {
+     if (!dev) {
+         return false;
+@@ -190,8 +190,11 @@ bool AP_Baro_DPS280::init()
+     set_config_registers();
+ 
+     instance = _frontend.register_sensor();
+-
+-    dev->set_device_type(DEVTYPE_BARO_DPS280);
++    if(_is_dps310) {
++	    dev->set_device_type(DEVTYPE_BARO_DPS310);
++    } else {
++	    dev->set_device_type(DEVTYPE_BARO_DPS280);
++    }
+     set_bus_id(instance, dev->get_bus_id());
+     
+     dev->get_semaphore()->give();
+diff --git a/libraries/AP_Baro/AP_Baro_DPS280.h b/libraries/AP_Baro/AP_Baro_DPS280.h
+index 799d71a600..79769261a4 100644
+--- a/libraries/AP_Baro/AP_Baro_DPS280.h
++++ b/libraries/AP_Baro/AP_Baro_DPS280.h
+@@ -29,7 +29,7 @@ public:
+     static AP_Baro_Backend *probe(AP_Baro &baro, AP_HAL::OwnPtr<AP_HAL::Device> dev, bool _is_dps310=false);
+ 
+ protected:
+-    bool init(void);
++    bool init(bool _is_dps310);
+     bool read_calibration(void);
+     void timer(void);
+     void calculate_PT(int32_t UT, int32_t UP, float &pressure, float &temperature);
