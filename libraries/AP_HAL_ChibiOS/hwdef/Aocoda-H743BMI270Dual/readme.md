@@ -29,4 +29,3 @@ links: https://discuss.ardupilot.org/t/why-analog-vtx-doesnt-support-600mw-power
 
 links: https://discuss.ardupilot.org/t/dps310-baro-on-i2c/65179/8
 
-
