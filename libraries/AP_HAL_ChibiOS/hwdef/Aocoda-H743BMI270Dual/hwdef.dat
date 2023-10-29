@@ -1,6 +1,5 @@
 # hw definition file for processing by chibios_pins.py
-# for AOCODARC H743 Dual, and it's for Daniel's copter:
-# Version 30: BMI270 + DPS310 + X8(4 motor with bddshot used)
+# for Aocoda-RC-H743Dual: MPU6000/BMI270
 
 # This hwdef.dat file contains a lot of comments so it can act as a
 # reference for developers adding new boards.
@@ -111,7 +110,7 @@ define CH_CFG_ST_RESOLUTION 16
 # If creating a board for a RTF vehicle you may wish to customise these.
 
 # USB setup
-USB_STRING_MANUFACTURER "H7Dual"
+USB_STRING_MANUFACTURER "Aocoda-RC-H743Dual"
 
 # Now we define the pins that USB is connected on.
 PA11 OTG_FS_DM OTG1
@@ -128,7 +127,7 @@ PA14 JTCK-SWCLK SWD
 # definitions. You can add speed modifiers if you want them, otherwise
 # the defaults for the peripheral class are used.
 
-# SPI1 for IMU1 (BMI270)
+# SPI1 for IMU1 (BMI270/MPU6000)
 PC15 IMU1_CS CS
 PA5 SPI1_SCK SPI1
 PA6 SPI1_MISO SPI1
@@ -391,12 +390,14 @@ define HAL_STORAGE_SIZE 32768
 # calibrations when moving to ChibiOS.
 
 # spi devices
-SPIDEV bmi270_1      SPI1 DEVID1 IMU1_CS      MODE3 10*MHZ 10*MHZ
-SPIDEV bmi270_2      SPI4 DEVID1 IMU2_CS      MODE3 10*MHZ 10*MHZ
+SPIDEV mpu6000       SPI1 DEVID1 IMU1_CS      MODE3   1*MHZ   4*MHZ
+SPIDEV bmi270_1      SPI1 DEVID1 IMU1_CS      MODE3  10*MHZ  10*MHZ
+SPIDEV bmi270_2      SPI4 DEVID1 IMU2_CS      MODE3  10*MHZ  10*MHZ
 SPIDEV dataflash     SPI3 DEVID1 FLASH_CS     MODE3 104*MHZ 104*MHZ
-SPIDEV osd           SPI2 DEVID4 MAX7456_CS   MODE0  10*MHZ 10*MHZ
+SPIDEV osd           SPI2 DEVID4 MAX7456_CS   MODE0  10*MHZ  10*MHZ
 
-# two IMUs
+# two BMI270 or one MPU6000 IMU
+IMU Invensense SPI:mpu6000 ROTATION_YAW_270
 IMU BMI270 SPI:bmi270_1 ROTATION_ROLL_180_YAW_90
 IMU BMI270 SPI:bmi270_2 ROTATION_PITCH_180
 
