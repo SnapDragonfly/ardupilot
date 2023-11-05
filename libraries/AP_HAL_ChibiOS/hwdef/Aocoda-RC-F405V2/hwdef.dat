@@ -52,7 +52,7 @@ MCU STM32F4xx STM32F405xx
 # Note that APJ is "ArduPilot JSON Firmware Format".
 
 # board ID for firmware load
-APJ_BOARD_ID 99
+APJ_BOARD_ID 5211
 
 # Now you need to say what crystal frequency you have for this
 # board. All of the clocks are scaled against this. Typical values are
