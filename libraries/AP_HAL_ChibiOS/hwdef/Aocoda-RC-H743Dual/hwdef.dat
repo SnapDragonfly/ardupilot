@@ -1,5 +1,5 @@
 # hw definition file for processing by chibios_pins.py
-# for Aocoda-RC-H743Dual: MPU6000/BMI270
+# for Aocoda-RC-H743Dual: MPU6000/BMI270x2
 
 # This hwdef.dat file contains a lot of comments so it can act as a
 # reference for developers adding new boards.
@@ -52,7 +52,7 @@ MCU STM32H7xx STM32H743xx
 # Note that APJ is "ArduPilot JSON Firmware Format".
 
 # board ID for firmware load
-APJ_BOARD_ID 1018
+APJ_BOARD_ID 5210
 
 # Now you need to say what crystal frequency you have for this
 # board. All of the clocks are scaled against this. Typical values are
@@ -116,8 +116,8 @@ USB_STRING_MANUFACTURER "Aocoda-RC-H743Dual"
 PA11 OTG_FS_DM OTG1
 PA12 OTG_FS_DP OTG1
 
-# OTG USB Detect
-PE2 EXT_CS2 CS
+# OTG USB VBUS
+PE2 VBUS INPUT
 
 # These are the pins for SWD debugging with a STlinkv2 or black-magic probe.
 PA13 JTMS-SWDIO SWD
@@ -234,11 +234,11 @@ define HAL_GPIO_LED_OFF 1
 # 2) SERIAL1: RC input
 # 3) SERIAL2: GPS
 # 4) SERIAL3: VTX
-# 5) SERIAL4: Telemetry
+# 5) SERIAL4: spare
 # 6) SERIAL5: spare
 # 7) SERIAL6: ESC Telemetry
 # 8) SERIAL7: spare
-# 9) SERIAL8: Optical Flow
+# 9) SERIAL8: spare
 
 # order of UARTs (and USB)
 SERIAL_ORDER OTG1 USART1 USART2 USART3 UART4 EMPTY USART6 UART7 UART8
@@ -280,32 +280,28 @@ SERIAL_ORDER OTG1 USART1 USART2 USART3 UART4 EMPTY USART6 UART7 UART8
 
 # USART1 (RC input), SERIAL1
 PA9  USART1_TX USART1
-PA10 TIM1_CH3 TIM1 RCININT PULLDOWN LOW
-
-# as an alternative config setup the RX6 pin as a uart. This allows
-# for bi-directional UART based receiver protocols such as FPort
-# without any extra hardware
-PA10 USART1_RX USART1 ALT(1)
-
-# This sets up the UART for talking to the IOMCU. Note that it is
-# vital that this UART has DMA available. See the DMA settings below
-# for more information.
+PA10 USART1_RX USART1
+define DEFAULT_SERIAL1_PROTOCOL SerialProtocol_RCIN
 
 # USART2 (GPS), SERIAL2
 PD5 USART2_TX USART2
 PD6 USART2_RX USART2
+define DEFAULT_SERIAL2_PROTOCOL SerialProtocol_GPS
 
 # USART3 (VTX), SERIAL3
 PD8 USART3_TX USART3
 PD9 USART3_RX USART3
+define DEFAULT_SERIAL3_PROTOCOL SerialProtocol_DJI_FPV
 
 # UART4 (Telemetry), SERIAL4
 PB8 UART4_RX UART4
 PB9 UART4_TX UART4
+define DEFAULT_SERIAL4_PROTOCOL SerialProtocol_None
 
 # USART6 (ESC Telemetry), SERIAL6
-PC6 USART6_TX USART6
-PC7 USART6_RX USART6
+PC6 USART6_TX USART6 NODMA
+PC7 USART6_RX USART6 NODMA
+define DEFAULT_SERIAL6_PROTOCOL SerialProtocol_ESCTelemetry
 
 # UART7 (spare), SERIA7
 PE7 UART7_RX UART7
@@ -322,29 +318,19 @@ PE1 UART8_TX UART8
 # starting at 50.
 
 # Motors
-PB0  TIM3_CH3 TIM3  PWM(1)  GPIO(50) BIDIR
-PB1  TIM3_CH4 TIM3  PWM(2)  GPIO(51)
-PA0  TIM2_CH1 TIM2  PWM(3)  GPIO(52) BIDIR
-PA1  TIM2_CH2 TIM2  PWM(4)  GPIO(53)
-PA2  TIM5_CH3 TIM5  PWM(5)  GPIO(54) BIDIR
-PA3  TIM5_CH4 TIM5  PWM(6)  GPIO(55)
-PD12 TIM4_CH1 TIM4  PWM(7)  GPIO(56) BIDIR
-PD13 TIM4_CH2 TIM4  PWM(8)  GPIO(57)
-
-
-#PB0  TIM8_CH2N TIM8  PWM(1)  GPIO(50)
-#PB1  TIM8_CH3N TIM8  PWM(2)  GPIO(51)
-#PA0  TIM5_CH1  TIM5  PWM(3)  GPIO(52)
-#PA1  TIM5_CH2  TIM5  PWM(4)  GPIO(53)
-#PA2  TIM5_CH3  TIM5  PWM(5)  GPIO(54)
-#PA3  TIM5_CH4  TIM5  PWM(6)  GPIO(55)
-#PD12 TIM4_CH1  TIM4  PWM(7)  GPIO(56)
-#PD13 TIM4_CH2  TIM4  PWM(8)  GPIO(57)
-#PD14 TIM4_CH3  TIM4  PWM(9)  GPIO(58) NODMA
-#PD15 TIM4_CH4  TIM4  PWM(10) GPIO(59) NODMA
-#PE5  TIM15_CH1 TIM15 PWM(11) GPIO(60) NODMA
-#PE6  TIM15_CH2 TIM15 PWM(12) GPIO(61) NODMA 
-##PA8  TIM1_CH1  TIM1  PWM(13) GPIO(62) # for WS2812 LED  this will be affects RC input
+PB0  TIM3_CH3 TIM3  PWM(1)  GPIO(50) BIDIR   //S1
+PB1  TIM3_CH4 TIM3  PWM(2)  GPIO(51)         //S2
+PA0  TIM2_CH1 TIM2  PWM(3)  GPIO(52) BIDIR   //S3
+PA1  TIM2_CH2 TIM2  PWM(4)  GPIO(53)         //S4
+PA2  TIM5_CH3 TIM5  PWM(5)  GPIO(54) BIDIR   //S5
+PA3  TIM5_CH4 TIM5  PWM(6)  GPIO(55)         //S6
+PD12 TIM4_CH1 TIM4  PWM(7)  GPIO(56) BIDIR   //S7
+PD13 TIM4_CH2 TIM4  PWM(8)  GPIO(57)         //S8
+PD14 TIM4_CH3  TIM4  PWM(9)  GPIO(58)        //S9
+PD15 TIM4_CH4  TIM4  PWM(10) GPIO(59)        //S10
+PE5  TIM15_CH1 TIM15 PWM(11) GPIO(60) NODMA  //SE1
+PE6  TIM15_CH2 TIM15 PWM(12) GPIO(61) NODMA  //SE2
+PA8  TIM1_CH1 TIM1  PWM(13) GPIO(62)
 
 
 # This defines the PWM pin for the buzzer (if there is one). It is
@@ -355,14 +341,11 @@ PD13 TIM4_CH2 TIM4  PWM(8)  GPIO(57)
 PA15 BUZZER OUTPUT LOW PULLDOWN GPIO(80)
 define HAL_BUZZER_PIN 80
 
-# This defines a couple of general purpose outputs, mapped to GPIO
-# numbers 1 and 2 for users.
-
 # GPIOs for 9V DCDC control (HIGH:on; LOW:off)
 PD10  PINIO1 OUTPUT GPIO(81) HIGH
 
-# GPIOs for pinio
-PD11  PINIO2 OUTPUT GPIO(82) LOW
+# GPIOs for pinio // not used
+#PD11  PINIO2 OUTPUT GPIO(82) LOW
 
 # DMA Priority
 DMA_PRIORITY S* TIM3* TIM2*
@@ -402,22 +385,21 @@ IMU BMI270 SPI:bmi270_1 ROTATION_ROLL_180_YAW_90
 IMU BMI270 SPI:bmi270_2 ROTATION_PITCH_180
 
 # DPS310 integrated on I2C2 bus, multiple possible choices for external barometer
+BARO MS56XX I2C:0:0x77
 BARO DPS310 I2C:0:0x76
+BARO BMP280 I2C:0:0x76
 
 # no built-in compass, but probe the i2c bus for all possible
 # external compass types
 define ALLOW_ARM_NO_COMPASS
 define HAL_PROBE_EXTERNAL_I2C_COMPASSES
-define HAL_I2C_INTERNAL_MASK 0
+define HAL_I2C_INTERNAL_MASK 1
 define HAL_COMPASS_AUTO_ROT_DEFAULT 2
 
 # setup for OSD
 define OSD_ENABLED 1
 define HAL_OSD_TYPE_DEFAULT 1
 ROMFS_WILDCARD libraries/AP_OSD/fonts/font*.bin
-
-# support VTX IRC tramp protocol
-define AP_TRAMP_ENABLED 1
 
 # enable logging to dataflash
 define HAL_LOGGING_DATAFLASH_ENABLED 1
