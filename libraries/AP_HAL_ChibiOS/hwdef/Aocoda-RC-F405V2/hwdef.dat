@@ -91,11 +91,13 @@ define STM32_ST_USE_TIMER 5
 define CH_CFG_ST_RESOLUTION 32
 
 # USB setup
-USB_STRING_MANUFACTURER "AocodaRC"
+USB_STRING_MANUFACTURER "Aocoda-RC-F405V2"
 
 # Now we define the pins that USB is connected on.
 PA11 OTG_FS_DM OTG1
 PA12 OTG_FS_DP OTG1
+
+PB12 VBUS INPUT OPENDRAIN
 
 # Now the first SPI bus. At minimum you need SCK, MISO and MOSI pin
 # definitions. You can add speed modifiers if you want them, otherwise
@@ -190,7 +192,7 @@ define HAL_GPIO_B_LED_PIN 2
 # 3) SERIAL2: RC input
 # 4) SERIAL3: ESC Telemetry
 # 5) SERIAL4: VTX
-# 6) SERIAL5: Telemetry
+# 6) SERIAL5: spare
 
 # order of UARTs (and USB)
 SERIAL_ORDER OTG1  USART1 USART2 USART3 UART4 UART5
@@ -233,27 +235,30 @@ SERIAL_ORDER OTG1  USART1 USART2 USART3 UART4 UART5
 # USART1 (GPS), SERIAL1
 PA9 USART1_TX USART1  
 PA10 USART1_RX USART1 
+define DEFAULT_SERIAL1_PROTOCOL SerialProtocol_GPS
 
 # USART2 (RC input), SERIAL2
 PA2 USART2_TX USART2 
-PA3 TIM9_CH2 TIM9 RCININT PULLDOWN LOW
+PA3 USART2_RX USART2
+define DEFAULT_SERIAL2_PROTOCOL SerialProtocol_RCIN
 
-# as an alternative config setup the RX6 pin as a uart. This allows
-# for bi-directional UART based receiver protocols such as FPort
-# without any extra hardware
-PA3 USART2_RX USART2 ALT(1)
+# used for SBUS/PPM etc.
+PA3 TIM9_CH2 TIM9 RCININT PULLDOWN LOW ALT(1)
 
 # USART3 (ESC Telemetry), SERIAL3
 PC10 USART3_TX USART3
 PC11 USART3_RX USART3
+define DEFAULT_SERIAL3_PROTOCOL SerialProtocol_ESCTelemetry
 
 # UART4 (VTX), SERIAL4
 PA0 UART4_TX UART4
 PA1 UART4_RX UART4
+define DEFAULT_SERIAL4_PROTOCOL SerialProtocol_Tramp
 
-# UART5 (Telemetry), SERIAL4
+# UART5 (spare), SERIAL5
 PC12 UART5_TX UART5
 PD2  UART5_RX UART5
+define DEFAULT_SERIAL5_PROTOCOL SerialProtocol_None
 
 # Now we start defining some PWM pins. We also map these pins to GPIO
 # values, so users can set BRD_PWM_COUNT to choose how many of the PWM
@@ -342,7 +347,8 @@ define HAL_LOGGING_DATAFLASH_ENABLED 1
 #DMA_PRIORITY SPI3* TIM1_CH3
 #DMA_NOSHARE TIM8* TIM1*
 
-PB12 VBUS INPUT OPENDRAIN
+# support VTX IRC tramp protocol
+define AP_TRAMP_ENABLED 1
 
 #define STM32_PWM_USE_ADVANCED TRUE
 
