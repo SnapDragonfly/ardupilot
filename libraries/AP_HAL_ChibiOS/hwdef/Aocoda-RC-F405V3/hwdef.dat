@@ -206,4 +206,4 @@ define HAL_BARO_WIND_COMP_ENABLED 0
 define GRIPPER_ENABLED 0
 
 # minimal drivers to reduce flash usage
-include ../include/minimize_common.inc
+include ../include/minimal.inc
