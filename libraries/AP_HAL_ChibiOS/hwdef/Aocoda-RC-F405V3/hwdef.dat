@@ -162,7 +162,7 @@ SPIDEV osd SPI2 DEVID1 OSD_CS MODE0 10*MHZ 10*MHZ
 SPIDEV sdcard SPI3 DEVID1 SDCARD_CS  MODE0 400*KHZ 25*MHZ
 
 # IMU Direction
-IMU Invensensev3 SPI:icm42688 ROTATION_NONE
+IMU Invensensev3 SPI:icm42688 ROTATION_ROLL_180_YAW_90
 IMU Invensense SPI:mpu6000 ROTATION_NONE
 
 # DPS310/BMP280 integrated on I2C2 bus, multiple possible choices for external barometer
