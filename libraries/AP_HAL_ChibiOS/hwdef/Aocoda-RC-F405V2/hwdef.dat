@@ -124,9 +124,9 @@ define DEFAULT_SERIAL5_PROTOCOL SerialProtocol_None
 # Motors
 #pwm output
 PC6    TIM8_CH1    TIM8    PWM(1)    GPIO(50)
-PC7    TIM8_CH2    TIM8    PWM(2)    GPIO(51)
+PC7    TIM8_CH2    TIM8    PWM(2)    GPIO(51)    BIDIR
 PC8    TIM8_CH3    TIM8    PWM(3)    GPIO(52)
-PC9    TIM8_CH4    TIM8    PWM(4)    GPIO(53)
+PC9    TIM8_CH4    TIM8    PWM(4)    GPIO(53)    BIDIR
 PA15   TIM2_CH1    TIM2    PWM(5)    GPIO(54)
 PA8    TIM1_CH1    TIM1    PWM(6)    GPIO(55)
 PB10   TIM2_CH3    TIM2    PWM(7)    GPIO(56)
