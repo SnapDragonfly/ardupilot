@@ -194,8 +194,6 @@ define HAL_BOARD_TERRAIN_DIRECTORY "/APM/TERRAIN"
 # support VTX IRC tramp protocol
 define AP_TRAMP_ENABLED 1
 
-#define STM32_PWM_USE_ADVANCED TRUE
-
 # disable SMBUS and fuel battery monitors to save flash
 define HAL_BATTMON_SMBUS_ENABLE 0
 define HAL_BATTMON_FUEL_ENABLE 0
