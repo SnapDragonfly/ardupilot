@@ -1,5 +1,23 @@
-Release 4.4.2-beta1 13th October 2023
--------------------------------------
+Release 4.4.3 14th November 2023
+--------------------------------
+
+Changes from 4.4.2:
+
+ - fixed setup of ICM45486 IMU on CubeOrangePlus-BG edition
+ - disable AFSR on IxM42xxx IMUs to prevent gyro bias for "stuck" gyros
+ - fixed AK09916 compass being non-responsive
+ - implement GPS_DRV_OPTION for using ellipsoid height in more GPS drivers
+ - fixed SIYI AP_Mount parsing bug
+ - configuration fixes for BETAFTP-F405 boards
+ - fixed origin versus home relative bug in quadplane landing and guided takeoff
+ - correct mavlink response for no airspeed sensor on preflight calibration
+ - protect against notch filtering with uninitialised RPM source in ESC telemetry
+ - allow lua scripts to populate full ESC telemetry data
+ - added YJUAV_A6SE_H743 support
+ - fixed uBlox M10 GPS support on boards with 1M flash
+
+Release 4.4.2 23th October 2023
+-------------------------------
 
 Changes from 4.4.1
 
