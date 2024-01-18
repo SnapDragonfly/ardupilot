@@ -1,5 +1,20 @@
 ArduPilot Copter Release Notes:
 ------------------------------------------------------------------
+Copter 4.4.4 19-Dec-2023 / 4.4.4-beta1 05-Dec-2023
+Changes from 4.4.3
+1) Autopilot related enhancement and fixes
+    - CubeOrange Sim-on-hardware compilation fix
+    - RADIX2HD supports external I2C compasses
+    - SpeedyBeeF405v4 support
+2) Bug fixes
+    - DroneCAN battery monitor with cell monitor SoC reporting fix
+    - NTF_LED_TYPES parameter description fixed (was missing IS31FL3195)
+    - ProfiLED output fixed in both Notify and Scripting
+    - Scripting bug that could cause crash if parameters were added in flight
+    - STAT_BOOTCNT param fix (was not updating in some cases)
+    - Takeoff RPM check fixed where motors are attached to AUX channels
+    - don't query hobbywing DroneCAN ESC IDs while armed
+------------------------------------------------------------------
 Copter 4.4.3 14-Nov-2023
 Changes from 4.4.3-beta1
 1) AP_GPS: correct uBlox M10 configuration on low flash boards
@@ -236,7 +251,6 @@ Changes from 4.3.6
         - Touchdown detection threshold is configurable (see PLDP_THRESH)
     - Position controller angle max adjusted inflight with CH6 Tuning knob (set TUNE=59)
     - Surface tracking time constant allows tuning response (see SURFTRAK_TC)
-    - Takeoff throttle max is configurable (see TKOFF_TH_MAX)
     - Throttle-Gain boost increases attitude control gains when throttle high (see ATC_THR_G_BOOST)
     - Waypoint navigation cornering acceleration is configurable (see WPNAV_ACCEL_C)
     - WeatherVane into the wind in Auto and Guided modes (see WVANE_ENABLE)

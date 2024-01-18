@@ -336,12 +336,12 @@ public:
       setup serial led output data for a given output channel
       and led number. A led number of -1 means all LEDs. LED 0 is the first LED
      */
-    virtual void set_serial_led_rgb_data(const uint16_t chan, int8_t led, uint8_t red, uint8_t green, uint8_t blue) {}
-    
+    virtual bool set_serial_led_rgb_data(const uint16_t chan, int8_t led, uint8_t red, uint8_t green, uint8_t blue) { return false; }
+
     /*
       trigger send of serial led
      */
-    virtual void serial_led_send(const uint16_t chan) {}
+    virtual bool serial_led_send(const uint16_t chan) { return false; }
 
     virtual void timer_info(ExpandingString &str) {}
 
@@ -390,6 +390,7 @@ public:
     // neopixel does not use pulse widths at all
     static constexpr uint32_t PROFI_BIT_0_TICKS = 7;
     static constexpr uint32_t PROFI_BIT_1_TICKS = 14;
+    static constexpr uint32_t PROFI_BIT_WIDTH_TICKS = 20;
 
     // suitably long LED output period to support high LED counts
     static constexpr uint32_t LED_OUTPUT_PERIOD_US = 10000;
