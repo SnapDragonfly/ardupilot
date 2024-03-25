@@ -58,6 +58,9 @@ logger = {}
 ---@param data1 integer|number|uint32_t_ud|string -- data to be logged, type to match format string
 function logger:write(name, labels, format, units, multipliers, data1, ...) end
 
+-- log a files content to onboard log
+---@param filename string -- file name
+function logger:log_file_content(filename) end
 
 -- i2c bus interaction
 ---@class i2c
@@ -1512,11 +1515,44 @@ function param:add_table(table_key, prefix, num_params) end
 function param:add_param(table_key, param_num, name, default_value) end
 
 -- desc
+---@class ESCTelemetryData_ud
+local ESCTelemetryData_ud = {}
+
+---@return ESCTelemetryData_ud
+function ESCTelemetryData() end
+
+-- set field
+---@param value integer
+function ESCTelemetryData_ud:motor_temp_cdeg(value) end
+
+-- set field
+---@param value number
+function ESCTelemetryData_ud:consumption_mah(value) end
+
+-- set field
+---@param value number
+function ESCTelemetryData_ud:current(value) end
+
+-- set field
+---@param value number
+function ESCTelemetryData_ud:voltage(value) end
+
+-- set field
+---@param value integer
+function ESCTelemetryData_ud:temperature_cdeg(value) end
+
+-- desc
 ---@class esc_telem
 esc_telem = {}
 
--- desc
+-- update telemetry data for an ESC instance
 ---@param instance integer
+---@param telemdata ESCTelemetryData_ud
+---@param data_mask integer
+function esc_telem:update_telem_data(instance, telemdata, data_mask) end
+
+-- desc
+---@param param1 integer
 ---@return uint32_t_ud|nil
 function esc_telem:get_usage_seconds(instance) end
 
@@ -1724,6 +1760,7 @@ serialLED = {}
 
 -- desc
 ---@param chan integer
+---@return boolean
 function serialLED:send(chan) end
 
 -- desc
@@ -1732,6 +1769,7 @@ function serialLED:send(chan) end
 ---@param red integer
 ---@param green integer
 ---@param blue integer
+---@return boolean
 function serialLED:set_RGB(chan, led_index, red, green, blue) end
 
 -- desc

@@ -246,12 +246,12 @@ public:
       setup serial LED output data for a given output channel
       and LEDs number. LED -1 is all LEDs
      */
-    void set_serial_led_rgb_data(const uint16_t chan, int8_t led, uint8_t red, uint8_t green, uint8_t blue) override;
+    bool set_serial_led_rgb_data(const uint16_t chan, int8_t led, uint8_t red, uint8_t green, uint8_t blue) override;
 
     /*
       trigger send of serial LED data
      */
-    void serial_led_send(const uint16_t chan) override;
+    bool serial_led_send(const uint16_t chan) override;
 
     /*
       rcout thread
@@ -405,7 +405,7 @@ private:
 #endif
         // are we safe to send another pulse?
         bool can_send_dshot_pulse() const {
-          return is_dshot_protocol(current_mode) && AP_HAL::micros() - last_dmar_send_us > (dshot_pulse_time_us + 50);
+          return is_dshot_protocol(current_mode) && AP_HAL::micros64() - last_dmar_send_us > (dshot_pulse_time_us + 50);
         }
 
         // return whether the group channel is both enabled in the group and for output

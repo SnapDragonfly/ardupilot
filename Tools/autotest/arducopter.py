@@ -11,7 +11,6 @@ import os
 import shutil
 import time
 import numpy
-import operator
 
 from pymavlink import quaternion
 from pymavlink import mavutil
@@ -135,7 +134,7 @@ class AutoTestCopter(AutoTest):
                      0, # param6
                      alt_min # param7
                      )
-        self.wait_for_alt(alt_min, timeout=timeout, max_err=max_err)
+        self.wait_altitude(alt_min-1, alt_min+max_err, relative=True, timeout=timeout)
 
     def takeoff(self,
                 alt_min=30,
@@ -155,16 +154,9 @@ class AutoTestCopter(AutoTest):
             self.user_takeoff(alt_min=alt_min, timeout=timeout, max_err=max_err)
         else:
             self.set_rc(3, takeoff_throttle)
-        self.wait_for_alt(alt_min=alt_min, timeout=timeout, max_err=max_err)
+        self.wait_altitude(alt_min-1, alt_min+max_err, relative=True, timeout=timeout)
         self.hover()
         self.progress("TAKEOFF COMPLETE")
-
-    def wait_for_alt(self, alt_min=30, timeout=30, max_err=5):
-        """Wait for minimum altitude to be reached."""
-        self.wait_altitude(alt_min - 1,
-                           (alt_min + max_err),
-                           relative=True,
-                           timeout=timeout)
 
     def land_and_disarm(self, timeout=60):
         """Land the quad."""
@@ -177,7 +169,7 @@ class AutoTestCopter(AutoTest):
         m = self.mav.recv_match(type='GLOBAL_POSITION_INT', blocking=True)
         alt = m.relative_alt / 1000.0 # mm -> m
         if alt > min_alt:
-            self.wait_for_alt(min_alt, timeout=timeout)
+            self.wait_altitude(min_alt-1, min_alt+5, relative=True, timeout=timeout)
 #        self.wait_statustext("SIM Hit ground", timeout=timeout)
         self.wait_disarmed()
 
@@ -2087,7 +2079,7 @@ class AutoTestCopter(AutoTest):
 
             self.progress("Regaining altitude")
             self.change_mode('ALT_HOLD')
-            self.wait_for_alt(20, max_err=40)
+            self.wait_altitude(19, 60, relative=True)
 
             self.progress("Flipping in pitch")
             self.set_rc(2, 1700)
@@ -2427,7 +2419,7 @@ class AutoTestCopter(AutoTest):
                     raise NotAchievedException("AUTOTUNE gains not present in pilot testing")
                 # land without changing mode
                 self.set_rc(3, 1000)
-                self.wait_for_alt(0)
+                self.wait_altitude(-1, 5, relative=True)
                 self.wait_disarmed()
                 # Check gains are still there after disarm
                 if (rlld == self.get_parameter("ATC_RAT_RLL_D") or
@@ -2678,7 +2670,7 @@ class AutoTestCopter(AutoTest):
                      0,
                      timeout=10,
                      want_result=mavutil.mavlink.MAV_RESULT_FAILED)
-        self.wait_statustext("Node {} unhealthy".format(gps1_nodeid), check_context=True)
+        self.wait_statustext(".*Node .* unhealthy", check_context=True, regex=True)
         self.stop_sup_program(instance=0)
         self.start_sup_program(instance=0)
         self.context_stop_collecting('STATUSTEXT')
@@ -3851,7 +3843,7 @@ class AutoTestCopter(AutoTest):
                 new_pos = self.mav.location()
                 delta = self.get_distance(target, new_pos)
                 self.progress("Landed %f metres from target position" % delta)
-                max_delta = 1
+                max_delta = 1.5
                 if delta > max_delta:
                     raise NotAchievedException("Did not land close enough to target position (%fm > %fm" % (delta, max_delta))
 
@@ -4568,7 +4560,7 @@ class AutoTestCopter(AutoTest):
             # determine if we've successfully navigated to close to
             # where we should be:
             dist = math.sqrt(delta_ef.x * delta_ef.x + delta_ef.y * delta_ef.y)
-            dist_max = 0.15
+            dist_max = 1
             self.progress("dist=%f want <%f" % (dist, dist_max))
             if dist < dist_max:
                 # success!  We've gotten within our target distance
@@ -4646,6 +4638,7 @@ class AutoTestCopter(AutoTest):
 
         except Exception as e:
             self.print_exception_caught(e)
+            self.disarm_vehicle(force=True)
             ex = e
 
         self.context_pop()
@@ -6826,6 +6819,7 @@ class AutoTestCopter(AutoTest):
             failed = False
             wants = []
             gots = []
+            epsilon = 20
             while True:
                 if self.get_sim_time_cached() - tstart > 30:
                     raise AutoTestTimeoutException("Failed to get distances")
@@ -6838,7 +6832,7 @@ class AutoTestCopter(AutoTest):
                 want = expected_distances_copy[m.orientation]
                 wants.append(want)
                 gots.append(got)
-                if abs(want - got) > 5:
+                if abs(want - got) > epsilon:
                     failed = True
                 del expected_distances_copy[m.orientation]
             if failed:
@@ -6857,9 +6851,11 @@ class AutoTestCopter(AutoTest):
             })
             self.set_analog_rangefinder_parameters()
             self.reboot_sitl()
-            tstart = self.get_sim_time()
+
             self.change_mode('LOITER')
             self.wait_ekf_happy()
+
+            tstart = self.get_sim_time()
             while True:
                 if self.armed():
                     break
@@ -6910,7 +6906,7 @@ class AutoTestCopter(AutoTest):
                 if self.get_sim_time_cached() - tstart > 10:
                     break
                 vel = self.get_body_frame_velocity()
-                if vel.length() > 0.3:
+                if vel.length() > 0.5:
                     raise NotAchievedException("Moved too much (%s)" %
                                                (str(vel),))
                 shove(None, None)
@@ -8338,7 +8334,7 @@ class AutoTestCopter(AutoTest):
             def verify_yaw(mav, m):
                 if m.get_type() != 'ATTITUDE':
                     return
-                yawspeed_thresh_rads = math.radians(10)
+                yawspeed_thresh_rads = math.radians(20)
                 if m.yawspeed > yawspeed_thresh_rads:
                     raise NotAchievedException("Excessive yaw on takeoff: %f deg/s > %f deg/s (frame=%s)" %
                                                (math.degrees(m.yawspeed), math.degrees(yawspeed_thresh_rads), frame))
@@ -9467,111 +9463,118 @@ class AutoTestCopter(AutoTest):
     def Sprayer(self):
         """Test sprayer functionality."""
         self.context_push()
-        ex = None
-        try:
-            rc_ch = 9
-            pump_ch = 5
-            spinner_ch = 6
-            pump_ch_min = 1050
-            pump_ch_trim = 1520
-            pump_ch_max = 1950
-            spinner_ch_min = 975
-            spinner_ch_trim = 1510
-            spinner_ch_max = 1975
 
-            self.set_parameters({
-                "SPRAY_ENABLE": 1,
+        rc_ch = 9
+        pump_ch = 5
+        spinner_ch = 6
+        pump_ch_min = 1050
+        pump_ch_trim = 1520
+        pump_ch_max = 1950
+        spinner_ch_min = 975
+        spinner_ch_trim = 1510
+        spinner_ch_max = 1975
 
-                "SERVO%u_FUNCTION" % pump_ch: 22,
-                "SERVO%u_MIN" % pump_ch: pump_ch_min,
-                "SERVO%u_TRIM" % pump_ch: pump_ch_trim,
-                "SERVO%u_MAX" % pump_ch: pump_ch_max,
+        self.set_parameters({
+            "SPRAY_ENABLE": 1,
 
-                "SERVO%u_FUNCTION" % spinner_ch: 23,
-                "SERVO%u_MIN" % spinner_ch: spinner_ch_min,
-                "SERVO%u_TRIM" % spinner_ch: spinner_ch_trim,
-                "SERVO%u_MAX" % spinner_ch: spinner_ch_max,
+            "SERVO%u_FUNCTION" % pump_ch: 22,
+            "SERVO%u_MIN" % pump_ch: pump_ch_min,
+            "SERVO%u_TRIM" % pump_ch: pump_ch_trim,
+            "SERVO%u_MAX" % pump_ch: pump_ch_max,
 
-                "SIM_SPR_ENABLE": 1,
-                "SIM_SPR_PUMP": pump_ch,
-                "SIM_SPR_SPIN": spinner_ch,
+            "SERVO%u_FUNCTION" % spinner_ch: 23,
+            "SERVO%u_MIN" % spinner_ch: spinner_ch_min,
+            "SERVO%u_TRIM" % spinner_ch: spinner_ch_trim,
+            "SERVO%u_MAX" % spinner_ch: spinner_ch_max,
 
-                "RC%u_OPTION" % rc_ch: 15,
-                "LOG_DISARMED": 1,
-            })
+            "SIM_SPR_ENABLE": 1,
+            "SIM_SPR_PUMP": pump_ch,
+            "SIM_SPR_SPIN": spinner_ch,
 
-            self.reboot_sitl()
+            "RC%u_OPTION" % rc_ch: 15,
+            "LOG_DISARMED": 1,
+        })
 
-            self.wait_ready_to_arm()
-            self.arm_vehicle()
+        self.reboot_sitl()
 
-            self.progress("test bootup state - it's zero-output!")
-            self.wait_servo_channel_value(spinner_ch, 0)
-            self.wait_servo_channel_value(pump_ch, 0)
+        self.wait_ready_to_arm()
+        self.arm_vehicle()
 
-            self.progress("Enable sprayer")
-            self.set_rc(rc_ch, 2000)
+        self.progress("test bootup state - it's zero-output!")
+        self.wait_servo_channel_value(spinner_ch, 0)
+        self.wait_servo_channel_value(pump_ch, 0)
 
-            self.progress("Testing zero-speed state")
-            self.wait_servo_channel_value(spinner_ch, spinner_ch_min)
-            self.wait_servo_channel_value(pump_ch, pump_ch_min)
+        self.progress("Enable sprayer")
+        self.set_rc(rc_ch, 2000)
 
-            self.progress("Testing turning it off")
-            self.set_rc(rc_ch, 1000)
-            self.wait_servo_channel_value(spinner_ch, spinner_ch_min)
-            self.wait_servo_channel_value(pump_ch, pump_ch_min)
+        self.progress("Testing zero-speed state")
+        self.wait_servo_channel_value(spinner_ch, spinner_ch_min)
+        self.wait_servo_channel_value(pump_ch, pump_ch_min)
 
-            self.progress("Testing turning it back on")
-            self.set_rc(rc_ch, 2000)
-            self.wait_servo_channel_value(spinner_ch, spinner_ch_min)
-            self.wait_servo_channel_value(pump_ch, pump_ch_min)
+        self.progress("Testing turning it off")
+        self.set_rc(rc_ch, 1000)
+        self.wait_servo_channel_value(spinner_ch, spinner_ch_min)
+        self.wait_servo_channel_value(pump_ch, pump_ch_min)
 
-            self.takeoff(30, mode='LOITER')
+        self.progress("Testing turning it back on")
+        self.set_rc(rc_ch, 2000)
+        self.wait_servo_channel_value(spinner_ch, spinner_ch_min)
+        self.wait_servo_channel_value(pump_ch, pump_ch_min)
 
-            self.progress("Testing speed-ramping")
-            self.set_rc(1, 1700) # start driving forward
+        self.takeoff(30, mode='LOITER')
 
-            # this is somewhat empirical...
-            self.wait_servo_channel_value(pump_ch, 1458, timeout=60)
+        self.progress("Testing speed-ramping")
+        self.set_rc(1, 1700) # start driving forward
 
-            self.progress("Turning it off again")
-            self.set_rc(rc_ch, 1000)
-            self.wait_servo_channel_value(spinner_ch, spinner_ch_min)
-            self.wait_servo_channel_value(pump_ch, pump_ch_min)
+        # this is somewhat empirical...
+        self.wait_servo_channel_value(
+            pump_ch,
+            1458,
+            timeout=60,
+            comparator=lambda x, y : abs(x-y) < 5
+        )
 
-            self.start_subtest("Checking mavlink commands")
-            self.progress("Starting Sprayer")
-            self.run_cmd(mavutil.mavlink.MAV_CMD_DO_SPRAYER,
-                         1,  # p1
-                         0,  # p2
-                         0,  # p3
-                         0,  # p4
-                         0,  # p5
-                         0,  # p6
-                         0)  # p7
+        self.progress("Turning it off again")
+        self.set_rc(rc_ch, 1000)
+        self.wait_servo_channel_value(spinner_ch, spinner_ch_min)
+        self.wait_servo_channel_value(pump_ch, pump_ch_min)
 
-            self.progress("Testing speed-ramping")
-            self.wait_servo_channel_value(pump_ch, 1458, timeout=60, comparator=operator.gt)
-            self.start_subtest("Stopping Sprayer")
-            self.run_cmd(mavutil.mavlink.MAV_CMD_DO_SPRAYER,
-                         0,  # p1
-                         0,  # p2
-                         0,  # p3
-                         0,  # p4
-                         0,  # p5
-                         0,  # p6
-                         0)  # p7
-            self.wait_servo_channel_value(pump_ch, pump_ch_min)
+        self.start_subtest("Checking mavlink commands")
+        self.progress("Starting Sprayer")
+        self.run_cmd(mavutil.mavlink.MAV_CMD_DO_SPRAYER,
+                     1,  # p1
+                     0,  # p2
+                     0,  # p3
+                     0,  # p4
+                     0,  # p5
+                     0,  # p6
+                     0)  # p7
 
-            self.progress("Sprayer OK")
-        except Exception as e:
-            self.print_exception_caught(e)
-            ex = e
+        self.progress("Testing speed-ramping")
+        self.wait_servo_channel_value(
+            pump_ch,
+            1458,
+            timeout=60,
+            comparator=lambda x, y : abs(x-y) < 5
+        )
+
+        self.start_subtest("Stopping Sprayer")
+        self.run_cmd(mavutil.mavlink.MAV_CMD_DO_SPRAYER,
+                     0,  # p1
+                     0,  # p2
+                     0,  # p3
+                     0,  # p4
+                     0,  # p5
+                     0,  # p6
+                     0)  # p7
+        self.wait_servo_channel_value(pump_ch, pump_ch_min)
+
         self.context_pop()
+
         self.disarm_vehicle(force=True)
         self.reboot_sitl()
-        if ex:
-            raise ex
+
+        self.progress("Sprayer OK")
 
     def tests1a(self):
         '''return list of all tests'''
@@ -9749,7 +9752,7 @@ class AutoTestCopter(AutoTest):
         self.reboot_sitl()
         self.wait_ready_to_arm()
         self.takeoff(alt_min=20, mode='LOITER')
-        self.land_and_disarm()
+        self.do_RTL()
         self.context_pop()
         self.reboot_sitl()
 

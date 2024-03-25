@@ -966,14 +966,12 @@ def write_mcu_config(f):
     env_vars['EXT_FLASH_SIZE_MB'] = get_config('EXT_FLASH_SIZE_MB', default=0, type=int)
 
     if env_vars['EXT_FLASH_SIZE_MB'] and not args.bootloader:
-        f.write('#define CRT1_AREAS_NUMBER 3\n')
-        f.write('#define CRT1_RAMFUNC_ENABLE TRUE\n') # this will enable loading program sections to RAM
+        f.write('#define CRT1_AREAS_NUMBER 4\n')
         f.write('#define __FASTRAMFUNC__ __attribute__ ((__section__(".fastramfunc")))\n')
         f.write('#define __RAMFUNC__ __attribute__ ((__section__(".ramfunc")))\n')
         f.write('#define PORT_IRQ_ATTRIBUTES __FASTRAMFUNC__\n')
     else:
         f.write('#define CRT1_AREAS_NUMBER 1\n')
-        f.write('#define CRT1_RAMFUNC_ENABLE FALSE\n')
 
     storage_flash_page = get_storage_flash_page()
     flash_reserve_end = get_config('FLASH_RESERVE_END_KB', default=0, type=int)
@@ -1296,17 +1294,18 @@ INCLUDE common.ld
         if ext_flash_size > 32:
             error("We only support 24bit addressing over external flash")
         env_vars['HAS_EXTERNAL_FLASH_SECTIONS'] = 1
+        build_flags.append('COPY_VECTORS_TO_RAM=yes')
         f.write('''/* generated ldscript.ld */
 MEMORY
 {
     default_flash (rx) : org = 0x%08x, len = %uK
     instram : org = 0x%08x, len = %uK
     ram0  : org = 0x%08x, len = %u
-    ram1  : org = 0x%08x, len = %u
-    ram2  : org = 0x%08x, len = %u
+    flashram : org = 0x%08x, len = %u
+    dataram : org = 0x%08x, len = %u
 }
 
-INCLUDE common_extf.ld
+INCLUDE common.ld
 ''' % (ext_flash_base, ext_flash_length,
        instruction_ram_base, instruction_ram_length,
        ram0_start, ram0_len,
@@ -1315,12 +1314,18 @@ INCLUDE common_extf.ld
 
 def copy_common_linkerscript(outdir):
     dirpath = os.path.dirname(os.path.realpath(__file__))
-    if not get_config('EXT_FLASH_SIZE_MB', default=0, type=int) or args.bootloader:
-        shutil.copy(os.path.join(dirpath, "../common/common.ld"),
-                    os.path.join(outdir, "common.ld"))
+
+    if args.bootloader:
+        linker = 'common.ld'
     else:
-        shutil.copy(os.path.join(dirpath, "../common/common_extf.ld"),
-                    os.path.join(outdir, "common_extf.ld"))
+        linker = get_mcu_config('LINKER_CONFIG')
+    if linker is None:
+        if not get_config('EXT_FLASH_SIZE_MB', default=0, type=int):
+            linker = 'common.ld'
+        else:
+            linker = 'common_extf.ld'
+    shutil.copy(os.path.join(dirpath, "../common", linker),
+                os.path.join(outdir, "common.ld"))
 
 def get_USB_IDs():
     '''return tuple of USB VID/PID'''
@@ -1412,9 +1417,11 @@ def write_SPI_config(f):
     for dev in spi_list:
         n = int(dev[3:])
         devlist.append('HAL_SPI%u_CONFIG' % n)
+        sck_pin = bylabel['SPI%s_SCK' % n]
+        sck_line = 'PAL_LINE(GPIO%s,%uU)' % (sck_pin.port, sck_pin.pin)
         f.write(
-            '#define HAL_SPI%u_CONFIG { &SPID%u, %u, STM32_SPI_SPI%u_DMA_STREAMS }\n'
-            % (n, n, n, n))
+            '#define HAL_SPI%u_CONFIG { &SPID%u, %u, STM32_SPI_SPI%u_DMA_STREAMS, %s }\n'
+            % (n, n, n, n, sck_line))
     f.write('#define HAL_SPI_BUS_LIST %s\n\n' % ','.join(devlist))
     write_SPI_table(f)
 

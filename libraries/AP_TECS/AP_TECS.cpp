@@ -832,6 +832,9 @@ float AP_TECS::_get_i_gain(void)
  */
 void AP_TECS::_update_throttle_without_airspeed(int16_t throttle_nudge)
 {
+    // reset clip status after possible use of synthetic airspeed
+    _thr_clip_status = clipStatus::NONE;
+
     // Calculate throttle demand by interpolating between pitch and throttle limits
     float nomThr;
     //If landing and we don't have an airspeed sensor and we have a non-zero
@@ -1089,6 +1092,7 @@ void AP_TECS::_initialise_states(int32_t ptchMinCO_cd, float hgt_afe)
         _lag_comp_hgt_offset  = 0.0f;
         _post_TO_hgt_offset   = 0.0f;
         _takeoff_start_ms = 0;
+        _use_synthetic_airspeed_once = false;
 
         _flags.underspeed            = false;
         _flags.badDescent            = false;
@@ -1156,8 +1160,18 @@ void AP_TECS::update_pitch_throttle(int32_t hgt_dem_cm,
                                     float hgt_afe,
                                     float load_factor)
 {
-    // Calculate time in seconds since last update
     uint64_t now = AP_HAL::micros64();
+    // check how long since we last did the 50Hz update; do nothing in
+    // this loop if that hasn't run for some signficant period of
+    // time.  Notably, it may never have run, leaving _TAS_state as
+    // zero and subsequently division-by-zero errors.
+    const float _DT_for_update_50hz = (now - _update_50hz_last_usec) * 1.0e-6f;
+    if (_update_50hz_last_usec == 0 || _DT_for_update_50hz > 1.0) {
+        // more than 1 second since it was run, don't do anything yet:
+        return;
+    }
+
+    // Calculate time in seconds since last update
     _DT = (now - _update_pitch_throttle_last_usec) * 1.0e-6f;
     _DT = MAX(_DT, 0.001f);
     _update_pitch_throttle_last_usec = now;

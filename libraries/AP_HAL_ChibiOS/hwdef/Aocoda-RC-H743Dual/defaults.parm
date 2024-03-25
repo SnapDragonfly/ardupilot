@@ -1,4 +1,4 @@
-# logging
-LOG_BACKEND_TYPE    4
-LOG_FILE_BUFSIZE    4
+
+# setup for LEDs on chan13
+SERVO13_FUNCTION 120
 

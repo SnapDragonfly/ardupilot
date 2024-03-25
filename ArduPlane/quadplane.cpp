@@ -2821,7 +2821,7 @@ void QuadPlane::vtol_position_controller(void)
         if (plane.control_mode == &plane.mode_guided || vtol_loiter_auto) {
             plane.ahrs.get_location(plane.current_loc);
             int32_t target_altitude_cm;
-            if (!plane.next_WP_loc.get_alt_cm(Location::AltFrame::ABOVE_HOME,target_altitude_cm)) {
+            if (!plane.next_WP_loc.get_alt_cm(Location::AltFrame::ABOVE_ORIGIN,target_altitude_cm)) {
                 break;
             }
             if (poscontrol.slow_descent &&
@@ -2829,7 +2829,7 @@ void QuadPlane::vtol_position_controller(void)
                 // gradually descend as we approach target
                 plane.auto_state.wp_proportion = plane.current_loc.line_path_proportion(plane.prev_WP_loc, plane.next_WP_loc);
                 int32_t prev_alt;
-                if (plane.prev_WP_loc.get_alt_cm(Location::AltFrame::ABOVE_HOME,prev_alt)) {
+                if (plane.prev_WP_loc.get_alt_cm(Location::AltFrame::ABOVE_ORIGIN,prev_alt)) {
                     target_altitude_cm = linear_interpolate(prev_alt,
                                                          target_altitude_cm,
                                                          plane.auto_state.wp_proportion,
@@ -2946,6 +2946,10 @@ void QuadPlane::setup_target_position(void)
  */
 void QuadPlane::takeoff_controller(void)
 {
+    // reset fixed wing controller to neutral as base output
+    plane.nav_roll_cd = 0;
+    plane.nav_pitch_cd = 0;
+
     if (!plane.arming.is_armed_and_safety_off()) {
         return;
     }
@@ -3007,8 +3011,6 @@ void QuadPlane::takeoff_controller(void)
     takeoff_last_run_ms = now;
 
     if (no_navigation) {
-        plane.nav_roll_cd = 0;
-        plane.nav_pitch_cd = 0;
         pos_control->relax_velocity_controller_xy();
     } else {
         pos_control->set_accel_desired_xy_cmss(zero);
