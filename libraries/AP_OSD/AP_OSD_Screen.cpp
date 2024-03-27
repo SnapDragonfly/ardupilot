@@ -1166,14 +1166,6 @@ const AP_Param::GroupInfo AP_OSD_Screen::var_info2[] = {
     AP_SUBGROUPINFO(rc_lq, "RC_LQ", 9, AP_OSD_Screen, AP_OSD_Setting),
 #endif
 
-#if HAL_WITH_ESC_TELEM
-    // @Param: ESC_IDX
-    // @DisplayName: ESC_IDX
-    // @Description: Index of the ESC to use for displaying ESC information. 0 means use the ESC with the highest value.
-    // @Range: 0 32
-    AP_GROUPINFO("ESC_IDX", 10, AP_OSD_Screen, esc_index, 0),
-#endif
-
     AP_GROUPEND
 };
 
