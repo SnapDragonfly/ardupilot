@@ -244,6 +244,7 @@ class ExtractFeatures(object):
             ('HAL_LOGGING_ENABLED', 'AP_Logger::Init'),
             ('AP_OSD_LINK_STATS_EXTENSIONS_ENABLED', r'AP_OSD_Screen::draw_rc_tx_power'),
             ('HAL_ENABLE_DRONECAN_DRIVERS', r'AP_DroneCAN::init'),
+            ('AP_OSD_LINK_STATS_EXTENSIONS_ENABLED', r'AP_OSD_Screen::draw_rc_tx_power'),
         ]
 
     def progress(self, msg):
