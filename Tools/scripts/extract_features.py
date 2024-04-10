@@ -243,6 +243,7 @@ class ExtractFeatures(object):
             ('HAL_BUTTON_ENABLED', 'AP_Button::update'),
             ('HAL_LOGGING_ENABLED', 'AP_Logger::Init'),
             ('AP_OSD_LINK_STATS_EXTENSIONS_ENABLED', r'AP_OSD_Screen::draw_rc_tx_power'),
+            ('HAL_ENABLE_DRONECAN_DRIVERS', r'AP_DroneCAN::init'),
         ]
 
     def progress(self, msg):
