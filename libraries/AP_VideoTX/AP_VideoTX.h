@@ -74,6 +74,12 @@ public:
         Inactive
     };
 
+    enum VTXType {
+        CRSF = 1U<<0,
+        SmartAudio = 1U<<1,
+        Tramp = 1U<<2
+    };
+
     struct PowerLevel {
         uint8_t level;
         uint16_t mw;
@@ -163,6 +169,10 @@ public:
     void set_configuration_finished(bool configuration_finished) { _configuration_finished = configuration_finished; }
     bool is_configuration_finished() { return _configuration_finished; }
 
+    // manage VTX backends
+    bool is_provider_enabled(VTXType type) const { return (_types & type) != 0; }
+    void set_provider_enabled(VTXType type) { _types |= type; }
+
     static AP_VideoTX *singleton;
 
 private:
@@ -196,6 +206,9 @@ private:
     bool _defaults_set;
     // true when configuration have been applied successfully to the VTX
     bool _configuration_finished;
+
+    // types of VTX providers
+    uint8_t _types;
 };
 
 namespace AP {

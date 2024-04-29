@@ -342,13 +342,6 @@ void AP_VideoTX::update(void)
         return;
     }
 
-#if HAL_CRSF_TELEM_ENABLED
-    AP_CRSF_Telem* crsf = AP::crsf_telem();
-
-    if (crsf != nullptr) {
-        crsf->update();
-    }
-#endif
     // manipulate pitmode if pitmode-on-disarm or power-on-arm is set
     if (has_option(VideoOptions::VTX_PITMODE_ON_DISARM) || has_option(VideoOptions::VTX_PITMODE_UNTIL_ARM)) {
         if (hal.util->get_soft_armed() && has_option(VideoOptions::VTX_PITMODE)) {
