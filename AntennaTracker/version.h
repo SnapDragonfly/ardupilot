@@ -11,9 +11,6 @@
 // the following line is parsed by the autotest scripts
 #define FIRMWARE_VERSION 4,5,3,FIRMWARE_VERSION_TYPE_OFFICIAL
 
-// the following line is parsed by the autotest scripts
-#define FIRMWARE_VERSION 4,5,3,FIRMWARE_VERSION_TYPE_BETA
-
 #define FW_MAJOR 4
 #define FW_MINOR 5
 #define FW_PATCH 3
