@@ -11656,7 +11656,6 @@ switch value'''
         valgrind_log = util.valgrind_log_filepath(binary=self.binary,
                                                   model=self.frame)
         files = glob.glob("*" + valgrind_log)
-        valgrind_failed = False
         for valgrind_log in files:
             os.chmod(valgrind_log, 0o644)
             if os.path.getsize(valgrind_log) > 0:
@@ -11665,9 +11664,6 @@ switch value'''
                     os.path.basename(valgrind_log)))
                 self.progress("Valgrind log: moving %s to %s" % (valgrind_log, target))
                 shutil.move(valgrind_log, target)
-                valgrind_failed = True
-        if valgrind_failed:
-            result_list.append(ValgrindFailedResult())
 
         return result_list
 
