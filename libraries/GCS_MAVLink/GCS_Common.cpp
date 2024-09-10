@@ -2149,7 +2149,7 @@ void GCS_MAVLINK::send_highres_imu()
     const AP_Baro &barometer = AP::baro();
     reply.abs_pressure = barometer.get_pressure() * 0.01f;
     reply.temperature = barometer.get_temperature();
-    reply.pressure_alt = barometer.get_altitude_AMSL();
+    reply.pressure_alt = barometer.get_altitude();
     reply.diff_pressure = reply.abs_pressure - barometer.get_ground_pressure() * 0.01f;
     reply.fields_updated |= (HIGHRES_IMU_UPDATED_ABS_PRESSURE | HIGHRES_IMU_UPDATED_DIFF_PRESSURE |
         HIGHRES_IMU_UPDATED_PRESSURE_ALT | HIGHRES_IMU_UPDATED_TEMPERATURE);
