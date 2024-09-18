@@ -43,7 +43,7 @@
 #if APM_BUILD_COPTER_OR_HELI || APM_BUILD_TYPE(APM_BUILD_ArduSub)
 #define SCHEDULER_DEFAULT_LOOP_RATE 400
 #else
-#define SCHEDULER_DEFAULT_LOOP_RATE  50
+#define SCHEDULER_DEFAULT_LOOP_RATE 200
 #endif
 
 #define debug(level, fmt, args...)   do { if ((level) <= _debug.get()) { hal.console->printf(fmt, ##args); }} while (0)
